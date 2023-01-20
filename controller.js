@@ -1,13 +1,16 @@
 import Role from "./models/Role.js";
 import User from "./models/User.js"
 import bcrypt from "bcrypt";
+import { validationResult } from "express-validator"
 
 class Controller {
 
     async register(req, res) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) return res.status(400).json({ message: "Registration Error", errors });
             const { username, password } = req.body;
-            const candidate = await User.findOne({ where: { username: username } });
+            const candidate = await User.findOne({ username: username });
             if (candidate) return res.status(400).json("User with this username exist...");
             const userRole = await Role.findOne({ value: 'USER' });
             const user = User.create({
@@ -23,7 +26,12 @@ class Controller {
     }
     async login(req, res) {
         try {
-
+            const { username, password } = req.body;
+            const user = await User.findOne({ username: username });
+            if (!user) return res.status(404).json("User Not Found...");
+            const userPassword = await bcrypt.compare(password, user.password);
+            if (!userPassword) return res.status(400).json("Password not valid...");
+            return res.status(200).json("Hello");
 
         } catch (err) {
             console.log(err);

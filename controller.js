@@ -2,6 +2,7 @@ import Role from "./models/Role.js";
 import User from "./models/User.js"
 import bcrypt from "bcrypt";
 import { validationResult } from "express-validator"
+import { generateAccessToken } from "./utils/generateJWT.js"
 
 class Controller {
 
@@ -31,8 +32,9 @@ class Controller {
             if (!user) return res.status(404).json("User Not Found...");
             const userPassword = await bcrypt.compare(password, user.password);
             if (!userPassword) return res.status(400).json("Password not valid...");
-            return res.status(200).json("Hello");
 
+            const jwtToken = generateAccessToken(user.id, user.roles);
+            return res.json(jwtToken);
         } catch (err) {
             console.log(err);
             res.status(400).json({ message: "Registration error!" })

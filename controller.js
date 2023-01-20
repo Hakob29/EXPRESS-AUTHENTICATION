@@ -1,3 +1,6 @@
+import Role from "./models/Role.js";
+import User from "./models/User.js"
+
 class Controller {
 
     register(req, res) {
@@ -15,8 +18,14 @@ class Controller {
         }
     }
 
-    getUsers(req, res) {
+    async getUsers(req, res) {
         try {
+            const userRole = new Role();
+            const adminRole = new Role({ value: "ADMIN" })
+
+            await userRole.save();
+            await adminRole.save();
+
             res.send("Hello world")
         } catch (err) {
             console.log(err);

@@ -1,6 +1,8 @@
 import { Router } from "express";
 import controller from "./controller.js";
 import { check } from "express-validator"
+import { authMiddleware } from "./utils/authMiddleware.js"
+import { roleMiddleware } from "./utils/roleMiddleware.js"
 
 const router = new Router();
 
@@ -12,6 +14,11 @@ router.post("/register", [
 
 router.post("/login", controller.login);
 
-router.get("/users", controller.getUsers)
+router.get("/users", authMiddleware, controller.getUsers);
+
+router.delete("/delete", roleMiddleware(["ADMIN"]), controller.deleteUser);
+
+router.put("/update", roleMiddleware(["ADMIN"]), controller.updateUser);
+
 
 export default router;

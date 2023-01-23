@@ -34,7 +34,7 @@ class Controller {
             if (!userPassword) return res.status(400).json("Password not valid...");
 
             const jwtToken = generateAccessToken(user.id, user.roles);
-            return res.json(jwtToken);
+            return res.json({ jwtToken });
         } catch (err) {
             console.log(err);
             res.status(400).json({ message: "Registration error!" })
@@ -43,11 +43,48 @@ class Controller {
 
     async getUsers(req, res) {
         try {
-
+            const users = await User.find();
+            return res.json(users);
         } catch (err) {
             console.log(err);
             res.status(400).json({ message: "Login error!" })
         }
+    }
+
+
+
+    async deleteUser(req, res) {
+        try {
+            const username = req.body.username;
+            const condidateUser = await User.findOne({ username: username });
+            if (!condidateUser) return res.status(404).json("User Not Found...");
+            await User.findOneAndRemove(condidateUser.id)
+            return res.json("User wich name is " + condidateUser.username + " deleted!")
+        } catch (err) {
+            console.log(err);
+            res.status(400).json({ message: "Something went wrong" })
+        }
+
+    }
+
+
+
+    async updateUser(req, res) {
+        try {
+            const { username, password, newUsername, newPassword } = req.body;
+            const condidateUser = await User.findOne({ username: username });
+            if (!condidateUser) return res.status(404).json("User Not Found...");
+            if (!(await bcrypt.compare(password, condidateUser.password))) return res.status(404).json("Password is wrong!!!");
+            await User.findByIdAndUpdate(condidateUser.id, {
+                username: newUsername,
+                password: newPassword
+            })
+            return res.json("User with name is " + condidateUser.username + " updated, " + newUsername)
+        } catch (err) {
+            console.log(err);
+            res.status(400).json({ message: "Something went wrong" })
+        }
+
     }
 }
 

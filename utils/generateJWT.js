@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 
-
 export function generateAccessToken(id, role) {
-
     const payload = {
         id,
         role
